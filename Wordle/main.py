@@ -38,7 +38,7 @@ def evaluate_guess(guess, solution):
 
     # second pass: mark present (but wrong position) and absent letters
     for i in range(5):
-        if feedback[i] == '': # Only check letters not already marked 'correct'
+        if feedback[i] == '': # only check letters not already marked 'correct'
             if guess[i] in solution_counts and solution_counts[guess[i]] > 0:
                 feedback[i] = 'present'
                 solution_counts[guess[i]] -= 1
@@ -51,8 +51,7 @@ def display_feedback(guess, feedback):
     display_line = []
     for i in range(5):
         if feedback[i] == 'correct':
-            # In a real terminal with color support, you'd use ANSI codes
-            # For simplicity here, we'll use markers like [ ] for correct, ( ) for present
+            # use markers like [ ] for correct, ( ) for present
             display_line.append(f"[{guess[i].upper()}]")
         elif feedback[i] == 'present':
             display_line.append(f"({guess[i].upper()})")
@@ -62,10 +61,10 @@ def display_feedback(guess, feedback):
 
 
 def playGame(puzzleSolution, wordList):
-    # puzzle = ["_", "_", "_", "_", "_"] # Replaced by feedback display
+    # puzzle = ["_", "_", "_", "_", "_"]
     guessLimit = 6
     currentGuessCount = 0
-    # lettersInWord = "" # Replaced by feedback display
+    # lettersInWord = "" 
     solved = False
     guesses_history = [] # Store past guesses and feedback
 
@@ -92,14 +91,14 @@ def playGame(puzzleSolution, wordList):
                 print("Invalid input: Word not in dictionary.")
                 prompt_text = "Please re-enter (valid word): "
             else:
-                break # Valid guess
+                break # valid guess
 
         currentGuessCount += 1
         feedback = evaluate_guess(guess, puzzleSolution)
         guesses_history.append((guess, feedback))
 
-        # Clear screen or add spacing before showing current guess feedback
-        # print("\n" * 2) # Optional: Add spacing
+        # clear screen or add spacing before showing current guess feedback
+        # print("\n" * 2) # optional: add spacing
         print("\nYour guess feedback:")
         display_feedback(guess, feedback)
 
@@ -110,9 +109,5 @@ def playGame(puzzleSolution, wordList):
 
     if not solved:
         print(f"\nSorry, you ran out of guesses. Idiot. The word was '{puzzleSolution.upper()}'.")
-
-# Remove old functions
-# def processGuess(guess, puzzleSolution, puzzle):
-# def updateLettersInWord(guess, puzzleSolution, lettersInWord):
 
 main()
