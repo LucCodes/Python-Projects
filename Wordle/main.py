@@ -1,87 +1,118 @@
 import random
+from collections import Counter
 
 def main():
-    wordFile = open("wordList.txt", 'r')
-    wordList = [line.strip() for line in wordFile.readlines()]
-    wordFile.close()
+    try:
+        with open("wordList.txt", 'r') as wordFile:
+            wordList = [line.strip().lower() for line in wordFile.readlines() if len(line.strip()) == 5]
+        if not wordList:
+            print("Error: wordList.txt is empty or contains no 5-letter words.")
+            return
+    except FileNotFoundError:
+        print("Error: wordList.txt not found in the current directory.")
+        return
 
     puzzleSolution = getWord(wordList)
+    # print(f"Debug: The word is {puzzleSolution}") # debugging
     playGame(puzzleSolution, wordList)
 
 def getWord(wordList):
-    x = int(input("Enter a positive integer: "))
-    random.seed(x)
-    size = len(wordList)
-    index = random.randrange(0, size)
-    return wordList[index]
+    return random.choice(wordList) # 
+
+def evaluate_guess(guess, solution):
+    """Evaluates a guess against the solution, returning feedback for each letter.
+
+    Returns:
+        list: A list of strings ('correct', 'present', 'absent') for each letter.
+    """
+    feedback = [''] * 5
+    solution_counts = Counter(solution)
+    guess_counts = Counter()
+
+    # first pass: mark correct letters
+    for i in range(5):
+        if guess[i] == solution[i]:
+            feedback[i] = 'correct'
+            solution_counts[guess[i]] -= 1
+            guess_counts[guess[i]] += 1
+
+    # second pass: mark present (but wrong position) and absent letters
+    for i in range(5):
+        if feedback[i] == '': # Only check letters not already marked 'correct'
+            if guess[i] in solution_counts and solution_counts[guess[i]] > 0:
+                feedback[i] = 'present'
+                solution_counts[guess[i]] -= 1
+            else:
+                feedback[i] = 'absent'
+    return feedback
+
+def display_feedback(guess, feedback):
+    """Displays the guess with color-coded feedback (using simple text markers)."""
+    display_line = []
+    for i in range(5):
+        if feedback[i] == 'correct':
+            # In a real terminal with color support, you'd use ANSI codes
+            # For simplicity here, we'll use markers like [ ] for correct, ( ) for present
+            display_line.append(f"[{guess[i].upper()}]")
+        elif feedback[i] == 'present':
+            display_line.append(f"({guess[i].upper()})")
+        else:
+            display_line.append(f" {guess[i].upper()} ")
+    print(" ".join(display_line))
+
 
 def playGame(puzzleSolution, wordList):
-    puzzle = ["_", "_", "_", "_", "_"]
+    # puzzle = ["_", "_", "_", "_", "_"] # Replaced by feedback display
     guessLimit = 6
     currentGuessCount = 0
-    lettersInWord = ""
+    # lettersInWord = "" # Replaced by feedback display
     solved = False
-    lost_game = False
+    guesses_history = [] # Store past guesses and feedback
 
-    print(f"lettersFound: {lettersInWord}  ")
-    print(f"Guesses left:  {guessLimit - currentGuessCount}")
-    print(" ".join(puzzle) + "  ")
-    print("1 2 3 4 5")
+    print("Welcome to Wordle!")
+    print(f"You have {guessLimit} tries to guess the 5-letter word.")
+    print("Feedback: [X] = Correct, (X) = Present but wrong spot, X = Absent")
 
     while currentGuessCount < guessLimit and not solved:
-        
+        print(f"\n--- Guess {currentGuessCount + 1} of {guessLimit} ---")
+
+        # Display previous guesses
+        for g, f in guesses_history:
+            display_feedback(g, f)
+
         prompt_text = "Guess a 5-letter word: "
-        
+        guess = ""
         while True:
             guess = input(prompt_text).lower()
 
-            if len(guess) == 5 and guess in wordList:
-                break
+            if len(guess) != 5:
+                print("Invalid input: Guess must be 5 letters long.")
+                prompt_text = "Please re-enter (5 letters): "
+            elif guess not in wordList:
+                print("Invalid input: Word not in dictionary.")
+                prompt_text = "Please re-enter (valid word): "
             else:
-                print("Must be a word from the dictionary that is 5 letters long.")
-                
-                if currentGuessCount == guessLimit - 1:
-                    print(f"You ran out of guesses (due to invalid input on last try). The word was {puzzleSolution}")
-                    lost_game = True
-                    break
-                else:
-                    prompt_text = "Please re-enter: "
-
-        if lost_game:
-            break
+                break # Valid guess
 
         currentGuessCount += 1
+        feedback = evaluate_guess(guess, puzzleSolution)
+        guesses_history.append((guess, feedback))
 
-        puzzle = processGuess(guess, puzzleSolution, puzzle)
-        lettersInWord = updateLettersInWord(guess, puzzleSolution, lettersInWord)
+        # Clear screen or add spacing before showing current guess feedback
+        # print("\n" * 2) # Optional: Add spacing
+        print("\nYour guess feedback:")
+        display_feedback(guess, feedback)
 
         if guess == puzzleSolution:
             solved = True
-            remaining_guesses_on_win = guessLimit - currentGuessCount
-            print(f"\nCongrats! You won! with {remaining_guesses_on_win} guesses left")
+            print(f"\nCongrats! You guessed the word '{puzzleSolution.upper()}' in {currentGuessCount} tries!")
             break
 
-        if currentGuessCount < guessLimit:
-            print(f"\nlettersFound: {lettersInWord}  ")
-            print(f"Guesses left:  {guessLimit - currentGuessCount}") 
-            print(" ".join(puzzle) + "  ")
-            print("1 2 3 4 5")
-        elif currentGuessCount == guessLimit and not solved:
-             print(f"\nYou ran out of guesses. The word was {puzzleSolution}")
+    if not solved:
+        print(f"\nSorry, you ran out of guesses. Idiot. The word was '{puzzleSolution.upper()}'.")
 
-def processGuess(guess, puzzleSolution, puzzle):
-    puzzleList = puzzle.copy()
-
-    for i in range(5):
-        if guess[i] == puzzleSolution[i]:
-            puzzleList[i] = guess[i]
-
-    return puzzleList
-
-def updateLettersInWord(guess, puzzleSolution, lettersInWord):
-    for i in range(5):
-        if guess[i] != puzzleSolution[i] and guess[i] in puzzleSolution and guess[i] not in lettersInWord:
-            lettersInWord += guess[i]
-    return lettersInWord
+# Remove old functions
+# def processGuess(guess, puzzleSolution, puzzle):
+# def updateLettersInWord(guess, puzzleSolution, lettersInWord):
 
 main()
