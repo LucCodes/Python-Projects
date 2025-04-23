@@ -1,12 +1,12 @@
 # Python Wordle Clone
 # by Lucas Dias
 
-This project is a simple, text-based clone of Wordle
+This project is a simple, text-based clone of Wordle made in Python. 
 
 ## How to Play
 
-1.  **Prerequisites:** Ensure you have Python 3 installed.
-2.  **Word List:** You need a file named `wordList.txt` in the same directory as `wordle.py`. This file should contain a list of valid 5-letter words, one word per line. The game will randomly select the secret word from this list and validate guesses against it.
+1.  **Prerequisites:** Make sure you have Python 3 installed.
+2.  **Word List:** You need a file named `wordList.txt` in the same directory as `wordle.py`. This file should contain a list of valid 5-letter words, one word per line. The game will randomly select a word from this list and validate guesses against it.
 3.  **Gameplay:**
     *   You have 6 attempts to guess the secret 5-letter word.
     *   Enter your 5-letter guess when prompted.
@@ -19,8 +19,8 @@ This project is a simple, text-based clone of Wordle
 
 ## Files
 
-*   `wordle.py`: The main Python script with game logic.
-*   `wordList.txt`: A text file containing the list of possible 5-letter words (provide or create this).
+*   `wordle.py`: The main script with game logic.
+*   `wordList.txt`: The text file containing the list of possible 5-letter words.
 
 ## Notes
 
